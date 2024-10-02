@@ -1,6 +1,7 @@
 {
   "domain": "openai_conversation",
   "name": "OpenAI Conversation",
+  "version": "0.1.0",
   "after_dependencies": ["assist_pipeline", "intent"],
   "codeowners": ["@balloob"],
   "config_flow": true,
