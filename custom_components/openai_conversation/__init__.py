@@ -19,10 +19,13 @@ from homeassistant.exceptions import (
     ServiceValidationError,
 )
 from homeassistant.helpers import config_validation as cv, selector
-from homeassistant.helpers.httpx_client import get_async_client
+from homeassistant.helpers.httpx_client import (
+    create_async_httpx_client,
+    get_async_client,
+)
 from homeassistant.helpers.typing import ConfigType
 
-from .const import CONF_BASE_URL, DOMAIN, LOGGER
+from .const import CONF_BASE_URL, CONF_PROXY, DOMAIN, LOGGER
 
 SERVICE_GENERATE_IMAGE = "generate_image"
 PLATFORMS = (Platform.CONVERSATION,)
@@ -89,10 +92,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: OpenAIConfigEntry) -> bool:
     """Set up OpenAI Conversation from a config entry."""
+    http_client = (
+        create_async_httpx_client(hass, proxy=entry.data[CONF_PROXY])
+        if entry.data.get(CONF_PROXY)
+        else get_async_client(hass)
+    )
     client = openai.AsyncOpenAI(
         api_key=entry.data[CONF_API_KEY],
         base_url=entry.data.get(CONF_BASE_URL) or None,
-        http_client=get_async_client(hass),
+        http_client=http_client,
     )
 
     # Cache current platform data which gets added to each request (caching done by library)
